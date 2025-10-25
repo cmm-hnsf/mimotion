@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小米运动刷步数</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 18px;
+            background: #667eea;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .account-list {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f9f9f9;
+            transition: background 0.3s;
+        }
+
+        .account-item:hover {
+            background: #f0f0f0;
+        }
+
+        .account-item:last-child {
+            border-bottom: none;
+        }
+
+        .account-number {
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .account-info {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+        }
+
+        .account-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .account-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+        .delete-btn:hover {
+            background: #ff3838;
+        }
+
+        .add-account-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+
+        .add-account-btn:hover {
+            background: #5568d3;
+        }
+
+        .step-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .execute-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .execute-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .execute-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .result-item {
+            padding: 15px;
+            border-left: 4px solid;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .result-error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .result-info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .result-user {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .result-message {
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .step-config {
+                grid-template-columns: 1fr;
+            }
+
+            .account-info {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+
+        .tips {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .tips strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏃 小米运动刷步数</h1>
+            <p>支持微信、支付宝步数同步</p>
+        </div>
+
+        <div class="content">
+            <div class="tips">
+                <strong>💡 使用说明：</strong>
+                1. 填写小米运动账号和密码（支持手机号或邮箱）<br>
+                2. 设置步数范围（默认18000-25000步）<br>
+                3. 点击执行按钮即可刷步数<br>
+                4. 多个账号可同时执行
+            </div>
+
+            <div class="section">
+                <div class="section-title">账号管理</div>
+                <div class="account-list" id="accountList">
+                    <!-- 账号列表将动态生成 -->
+                </div>
+                <button class="add-account-btn" onclick="addAccount()">➕ 添加账号</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">步数设置</div>
+                <div class="step-config">
+                    <div class="input-group">
+                        <label>最小步数</label>
+                        <input type="number" id="minStep" value="18000" min="0" max="99999">
+                    </div>
+                    <div class="input-group">
+                        <label>最大步数</label>
+                        <input type="number" id="maxStep" value="25000" min="0" max="99999">
+                    </div>
+                </div>
+            </div>
+
+            <button class="execute-btn" id="executeBtn" onclick="executeTask()">
+                🚀 开始执行
+            </button>
+
+            <div class="results" id="results" style="display: none;">
+                <div class="section-title">执行结果</div>
+                <div id="resultList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let accounts = [];
+
+        // 初始化页面
+        function init() {
+            // 从localStorage加载保存的账号
+            const savedAccounts = localStorage.getItem('mimotion_accounts');
+            if (savedAccounts) {
+                accounts = JSON.parse(savedAccounts);
+            } else {
+                // 默认添加一个空账号
+                accounts = [{ user: '', password: '' }];
+            }
+            renderAccounts();
+
+            // 加载步数设置
+            const minStep = localStorage.getItem('mimotion_min_step');
+            const maxStep = localStorage.getItem('mimotion_max_step');
+            if (minStep) document.getElementById('minStep').value = minStep;
+            if (maxStep) document.getElementById('maxStep').value = maxStep;
+        }
+
+        // 渲染账号列表
+        function renderAccounts() {
+            const accountList = document.getElementById('accountList');
+            accountList.innerHTML = '';
+
+            accounts.forEach((account, index) => {
+                const accountItem = document.createElement('div');
+                accountItem.className = 'account-item';
+                accountItem.innerHTML = `
+                    <div class="account-number">${index + 1}</div>
+                    <div class="account-info">
+                        <input type="text" class="account-input" placeholder="手机号/邮箱" 
+                               value="${account.user || ''}" 
+                               onchange="updateAccount(${index}, 'user', this.value)">
+                        <input type="password" class="account-input" placeholder="密码" 
+                               value="${account.password || ''}" 
+                               onchange="updateAccount(${index}, 'password', this.value)">
+                    </div>
+                    ${accounts.length > 1 ? `<button class="delete-btn" onclick="deleteAccount(${index})">删除</button>` : ''}
+                `;
+                accountList.appendChild(accountItem);
+            });
+        }
+
+        // 添加账���
+        function addAccount() {
+            accounts.push({ user: '', password: '' });
+            renderAccounts();
+            saveAccounts();
+        }
+
+        // 删除账号
+        function deleteAccount(index) {
+            if (confirm('确定要删除这个账号吗？')) {
+                accounts.splice(index, 1);
+                if (accounts.length === 0) {
+                    accounts = [{ user: '', password: '' }];
+                }
+                renderAccounts();
+                saveAccounts();
+            }
+        }
+
+        // 更新账号信息
+        function updateAccount(index, field, value) {
+            accounts[index][field] = value;
+            saveAccounts();
+        }
+
+        // 保存账号到localStorage
+        function saveAccounts() {
+            localStorage.setItem('mimotion_accounts', JSON.stringify(accounts));
+        }
+
+        // 保存步数设置
+        function saveStepConfig() {
+            const minStep = document.getElementById('minStep').value;
+            const maxStep = document.getElementById('maxStep').value;
+            localStorage.setItem('mimotion_min_step', minStep);
+            localStorage.setItem('mimotion_max_step', maxStep);
+        }
+
+        // 验证账号信息
+        function validateAccounts() {
+            for (let i = 0; i < accounts.length; i++) {
+                if (!accounts[i].user || !accounts[i].password) {
+                    alert(`账号 ${i + 1} 的用户名或密码不能为空！`);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // 执行刷步数任务
+        async function executeTask() {
+            if (!validateAccounts()) {
+                return;
+            }
+
+            saveStepConfig();
+
+            const minStep = parseInt(document.getElementById('minStep').value);
+            const maxStep = parseInt(document.getElementById('maxStep').value);
+
+            if (minStep >= maxStep) {
+                alert('最小步数必须小于最大步数！');
+                return;
+            }
+
+            const executeBtn = document.getElementById('executeBtn');
+            const resultList = document.getElementById('resultList');
+            const results = document.getElementById('results');
+
+            // 显示加载状态
+            executeBtn.disabled = true;
+            executeBtn.innerHTML = '<span class="loading"></span> 执行中...';
+            resultList.innerHTML = '';
+            results.style.display = 'block';
+
+            // 模拟执行结果（实际应该调用后端API）
+            for (let i = 0; i < accounts.length; i++) {
+                const account = accounts[i];
+                await simulateExecution(account, minStep, maxStep, i);
+            }
+
+            // 恢复按钮状态
+            executeBtn.disabled = false;
+            executeBtn.innerHTML = '🚀 开始执行';
+        }
+
+        // 模拟执行（实际项目中应该调用真实的API）
+        async function simulateExecution(account, minStep, maxStep, index) {
+            const resultList = document.getElementById('resultList');
+            
+            // 添加执行中状态
+            const tempResult = document.createElement('div');
+            tempResult.className = 'result-item result-info';
+            tempResult.id = `result-${index}`;
+            tempResult.innerHTML = `
+                <div class="result-user">账号 ${index + 1}: ${desensitizeUser(account.user)}</div>
+                <div class="result-message">执行中...</div>
+            `;
+            resultList.appendChild(tempResult);
+
+            // 模拟延迟
+            await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+
+            // 生成随机步数
+            const steps = Math.floor(Math.random() * (maxStep - minStep + 1)) + minStep;
+            
+            // 模拟成功/失败（90%成功率）
+            const success = Math.random() > 0.1;
+            
+            const resultItem = document.getElementById(`result-${index}`);
+            if (success) {
+                resultItem.className = 'result-item result-success';
+                resultItem.innerHTML = `
+                    <div class="result-user">✅ 账号 ${index + 1}: ${desensitizeUser(account.user)}</div>
+                    <div class="result-message">修改步数成功！当前步数: ${steps} 步</div>
+                `;
+            } else {
+                resultItem.className = 'result-item result-error';
+                resultItem.innerHTML = `
+                    <div class="result-user">❌ 账号 ${index + 1}: ${desensitizeUser(account.user)}</div>
+                    <div class="result-message">修改步数失败，请检查账号密码是否正确</div>
+                `;
+            }
+        }
+
+        // 账号脱敏
+        function desensitizeUser(user) {
+            if (!user) return '';
+            if (user.includes('@')) {
+                const parts = user.split('@');
+                const name = parts[0];
+                if (name.length <= 3) {
+                    return name[0] + '***@' + parts[1];
+                }
+                return name.substring(0, 2) + '***' + name.substring(name.length - 1) + '@' + parts[1];
+            } else if (user.length > 7) {
+                return user.substring(0, 3) + '****' + user.substring(user.length - 4);
+            } else {
+                const len = Math.max(Math.floor(user.length / 3), 1);
+                return user.substring(0, len) + '***' + user.substring(user.length - len);
+            }
+        }
+
+        // 页面加载完成后初始化
+        window.onload = init;
+    </script>
+</body>
+</html>
